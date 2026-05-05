@@ -1,0 +1,85 @@
+import cv2
+import numpy as np
+import os
+import csv
+
+# --- Parameters ---
+input_folder = r"D:\Desktop\Test"
+output_folder = r"D:\Desktop\Test\Detected"
+csv_path = os.path.join(output_folder, "results.csv")
+
+os.makedirs(output_folder, exist_ok=True)
+
+results = []
+
+for filename in os.listdir(input_folder):
+    if not filename.lower().endswith(".png"):
+        continue
+
+    input_path = os.path.join(input_folder, filename)
+    output_path = os.path.join(output_folder, f"detected_{filename}")
+
+    image = cv2.imread(input_path, cv2.IMREAD_UNCHANGED)
+    output_image = image.copy()
+
+
+    # --- RED (Neurites) -----
+    red_mask = cv2.inRange(image, np.array([0, 0, 255]), np.array([0, 0, 255]))
+    red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_CLOSE, np.ones((1, 1), np.uint8))
+
+    contours_red, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    neurite_count = 0
+
+    for cnt in contours_red:
+        cv2.drawContours(output_image, [cnt], -1, (255, 255, 255), 1)
+        neurite_count += 1
+
+    # --- GREEN (Cell bodies) ----
+    green_mask = cv2.inRange(image, np.array([0, 255, 0]), np.array([0, 255, 0]))
+    green_mask = cv2.morphologyEx(green_mask, cv2.MORPH_CLOSE, np.ones((80, 80), np.uint8))
+
+    contours_green, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cellbody_count = 0
+
+    for cnt in contours_green:
+        if len(cnt) < 5:
+            continue
+        cv2.drawContours(output_image, [cnt], -1, (255, 255, 255), 2)
+        cellbody_count += 1
+
+    # --- BLUE (Plaques) ----
+    blue_mask = cv2.inRange(image, np.array([255, 0, 0]), np.array([255, 0, 0]))
+    blue_mask = cv2.morphologyEx(blue_mask, cv2.MORPH_CLOSE, np.ones((250, 250), np.uint8))
+
+    contours_blue, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    plaque_count = 0
+
+    for cnt in contours_blue:
+        if len(cnt) < 5:
+            continue
+        cv2.drawContours(output_image, [cnt], -1, (255, 255, 255), 3)
+        plaque_count += 1
+
+    # --- Labels ----
+    cv2.putText(output_image, f"N:{neurite_count}", (30, 60),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+    cv2.putText(output_image, f"C:{cellbody_count}", (30, 110),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+    cv2.putText(output_image, f"P:{plaque_count}", (30, 160),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+    print(f"{filename}: N={neurite_count}, C={cellbody_count}, P={plaque_count}")
+
+    cv2.imwrite(output_path, output_image)
+
+    results.append([filename, neurite_count, cellbody_count, plaque_count])
+
+# --- CSV ----
+with open(csv_path, mode="w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerow(["image_name", "neurite_count", "cellbody_count", "plaque_count"])
+    writer.writerows(results)
+
+print("Done")
