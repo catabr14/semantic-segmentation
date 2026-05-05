@@ -1,4 +1,4 @@
-# Post hoc Object-Level Quantification from Segmentation Maps
+# Object-Level Quantification from Segmentation Maps
 
 This repository provides a post-processing pipeline for converting RGB semantic segmentation outputs into object-level counts of pathological structures. The script extracts class-specific regions from a single color-coded segmentation image, applies morphological operations to merge fragmented structures, and performs connected component analysis to count individual objects.
 
