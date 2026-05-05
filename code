@@ -3,9 +3,8 @@ import numpy as np
 import os
 import csv
 
-# --- Parameters ---
-input_folder = r"D:\Desktop\Test"
-output_folder = r"D:\Desktop\Test\Detected"
+input_folder = r"" # Put your own directories here
+output_folder = r""
 csv_path = os.path.join(output_folder, "results.csv")
 
 os.makedirs(output_folder, exist_ok=True)
