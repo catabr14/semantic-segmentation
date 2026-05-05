@@ -1,6 +1,6 @@
 # Object-Level Quantification from Segmentation Maps
 
-This repository provides a post-processing pipeline for converting RGB semantic segmentation outputs into object-level counts of pathological structures. The script extracts class-specific regions from a single color-coded segmentation image, applies morphological operations to merge fragmented structures, and performs connected component analysis to count individual objects.
+Post-processing pipeline for converting RGB semantic segmentation outputs into object-level counts of pathological structures. The script extracts class-specific regions from a single color-coded segmentation image, applies morphological operations to merge fragmented structures, and performs connected component analysis to count individual objects.
 
 ---
 
@@ -17,7 +17,7 @@ For each image:
 2. Morphological closing is applied to merge fragmented regions  
 3. External contours are detected  
 4. Each valid contour is counted as one object  
-5. Results are saved as annotated images and a CSV file  
+5. Results are saved as annotated images and in a CSV file  
 
 ---
 
@@ -35,10 +35,9 @@ Morphological closing (dilation followed by erosion) is applied using class-spec
 | Cell bodies  | 80 × 80    | Merge fragmented regions |
 | Plaques      | 250 × 250  | Merge large fragmented structures |
 
-These kernel sizes act as hyperparameters controlling how aggressively nearby regions are merged. They were manually tuned based on visual inspection.
+These kernel sizes act as hyperparameters controlling how nearby regions are merged. They were manually tuned based on visual inspection.
 
 ### Object Detection
-- Contours are extracted using `cv2.findContours`
-- Each contour is treated as one object
+- Contours are extracted and each one is treated as one object
 - Small/noisy detections are filtered:
   - Cell bodies & plaques: ≥ 5 points
